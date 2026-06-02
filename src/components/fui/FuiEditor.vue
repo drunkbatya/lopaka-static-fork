@@ -13,6 +13,7 @@ import Inspector from '/src/components/fui/inspector/Inspector.vue';
 import FuiSelectDisplay from '/src/components/fui/FuiSelectDisplay/FuiSelectDisplay.vue';
 import FuiSelectPlatform from '/src/components/fui/FuiSelectPlatform.vue';
 import FuiSelectScale from '/src/components/fui/FuiSelectScale.vue';
+import FuiSaveLoadProject from '/src/components/fui/FuiSaveLoadProject.vue';
 import FuiTools from '/src/components/fui/FuiTools.vue';
 import PaintBrushColorInput from './PaintBrushColorInput.vue';
 import PaintColorModeToggle from './PaintColorModeToggle.vue';
@@ -271,7 +272,12 @@ function onMouseClick() {
                 class="font-sans flex flex-row gap-4 justify-between"
                 v-if="isScreenLoaded && !isScreenNotFound"
             >
-                <div class="w-1/6 text-center">
+                <div class="w-1/6 flex flex-row gap-2 items-center justify-start">
+                    <FuiSaveLoadProject
+                        v-if="!readonly"
+                        @setInfoMessage="(msg) => emit('setInfoMessage', msg)"
+                        @setErrorMessage="(msg) => emit('setErrorMessage', msg)"
+                    />
                     <Button
                         v-if="isFlipper && isSerialSupported"
                         @click="toggleFlipperPreview"

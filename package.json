@@ -12,7 +12,7 @@
     "test": "vitest --mode test --run",
     "test-dev": "vitest --mode test",
     "test-report": "vitest --coverage.enabled true --run",
-    "build": "vitepress build pages && vite build",
+    "build": "vite build",
     "docs:dev": "vitepress dev pages",
     "docs:build": "vitepress build pages",
     "docs:preview": "vitepress preview pages",
@@ -32,7 +32,7 @@
     "flipperzero"
   ],
   "author": "sbrin",
-  "license": "SEE LICENSE IN LICENSE",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/sbrin/lopaka/issues"
   },

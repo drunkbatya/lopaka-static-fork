@@ -424,6 +424,106 @@ export class Session {
         }
         return platform.createRenderer();
     }
+
+    exportProject = (): TExportedProject => {
+        return {
+            version: 1,
+            platform: this.state.platform,
+            display: {x: this.state.display.x, y: this.state.display.y},
+            isDisplayCustom: this.state.isDisplayCustom,
+            screenBgColor: this.platforms[this.state.platform]?.features.screenBgColor,
+            layers: this.layersManager.layers.map((l) => l.state),
+            customImages: this.state.customImages.map(serializeCustomImage),
+            customFonts: this.state.customFonts.map((f) => ({...f})),
+        };
+    };
+
+    importProject = async (data: TExportedProject): Promise<void> => {
+        if (!data || typeof data !== 'object' || !data.platform || !this.platforms[data.platform]) {
+            throw new Error('Invalid project file');
+        }
+        if (data.screenBgColor) {
+            this.platforms[data.platform].features.screenBgColor = data.screenBgColor;
+            localStorage.setItem(`lopaka_${data.platform}_color_bg`, data.screenBgColor);
+        }
+        this.state.customImages = [];
+        if (Array.isArray(data.customImages)) {
+            const restored = await Promise.all(data.customImages.map(deserializeCustomImage));
+            this.state.customImages = restored;
+        }
+        this.state.customFonts = Array.isArray(data.customFonts) ? data.customFonts.map((f) => ({...f})) : [];
+        await this.preparePlatform(data.platform, false, data.layers ?? []);
+        if (data.display?.x && data.display?.y) {
+            this.setDisplay(new Point(data.display.x, data.display.y));
+        }
+        this.saveDisplayCustom(Boolean(data.isDisplayCustom));
+        this.virtualScreen.redraw();
+    };
+}
+
+export type TSerializedCustomImage = {
+    name: string;
+    width: number;
+    height: number;
+    src: string;
+    isCustom?: boolean;
+    id?: number | null;
+    colorMode?: string;
+};
+
+export type TExportedProject = {
+    version: number;
+    platform: string;
+    display: {x: number; y: number};
+    isDisplayCustom: boolean;
+    screenBgColor?: string;
+    layers: any[];
+    customImages?: TSerializedCustomImage[];
+    customFonts?: TPlatformFont[];
+};
+
+function serializeCustomImage(img: TLayerImageData): TSerializedCustomImage {
+    const src = img.image?.src ?? '';
+    let dataUrl = src;
+    // Re-encode through a canvas when the source is not already a data URL
+    // so the exported JSON stays self-contained.
+    if (!src.startsWith('data:')) {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (ctx && img.image) {
+            ctx.drawImage(img.image, 0, 0);
+            dataUrl = canvas.toDataURL('image/png');
+        }
+    }
+    return {
+        name: img.name,
+        width: img.width,
+        height: img.height,
+        src: dataUrl,
+        isCustom: img.isCustom,
+        id: img.id ?? null,
+        colorMode: img.colorMode,
+    };
+}
+
+async function deserializeCustomImage(entry: TSerializedCustomImage): Promise<TLayerImageData> {
+    const image = new Image();
+    image.src = entry.src;
+    await new Promise<void>((resolve, reject) => {
+        image.onload = () => resolve();
+        image.onerror = () => reject(new Error(`Failed to load custom image: ${entry.name}`));
+    });
+    return {
+        name: entry.name,
+        width: entry.width,
+        height: entry.height,
+        image,
+        isCustom: entry.isCustom ?? true,
+        id: entry.id ?? undefined,
+        colorMode: entry.colorMode,
+    };
 }
 
 export async function loadLayers(states: any[], append: boolean = false, saveHistory: boolean = false) {

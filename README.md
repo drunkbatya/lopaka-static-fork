@@ -1,3 +1,6 @@
+## Why?
+The only one reason why this fork exists is to have an open-source version on hand: [github pages](https://drunkbatya.github.io/lopaka-static-fork/). Also added the save/load options.
+
 # Lopaka — Stunning graphics for embedded screens
 
 Lopaka is an open-source graphics editor aimed at providing an interface for creating graphics for [TFT_eSPI](https://github.com/Bodmer/TFT_eSPI), [U8g2](https://github.com/olikraus/u8g2), [AdafruitGFX](https://github.com/adafruit/Adafruit-GFX-Library) and [Flipper Zero](https://flipperzero.one/). Compatible with [M5GFX](https://github.com/m5stack/M5GFX), [LovyanGFX](https://github.com/lovyan03/LovyanGFX), [Watchy](https://github.com/sqfmi/Watchy) and many others.
